@@ -2,34 +2,34 @@
 require_once 'includes/auth.php';
 require_once '../config/database.php';
 
-$adminName = isset($_SESSION['admin_username']) ? $_SESSION['admin_username'] : 'Admin';
+$adminName = $_SESSION['admin_username'] ?? 'Admin';
 
 $totalPosts = 0;
 $publishedPosts = 0;
 $draftPosts = 0;
-$totalPages = 0;
+$totalUsers = 0;
 
-$postResult = $conn->query("SELECT COUNT(*) AS total FROM posts");
-if ($postResult && $row = $postResult->fetch_assoc()) {
-    $totalPosts = $row['total'];
+$q1 = $conn->query("SELECT COUNT(*) AS total FROM posts");
+if ($q1 && $row = $q1->fetch_assoc()) {
+    $totalPosts = (int)$row['total'];
 }
 
-$publishedResult = $conn->query("SELECT COUNT(*) AS total FROM posts WHERE status = 'published'");
-if ($publishedResult && $row = $publishedResult->fetch_assoc()) {
-    $publishedPosts = $row['total'];
+$q2 = $conn->query("SELECT COUNT(*) AS total FROM posts WHERE status = 'published'");
+if ($q2 && $row = $q2->fetch_assoc()) {
+    $publishedPosts = (int)$row['total'];
 }
 
-$draftResult = $conn->query("SELECT COUNT(*) AS total FROM posts WHERE status = 'draft'");
-if ($draftResult && $row = $draftResult->fetch_assoc()) {
-    $draftPosts = $row['total'];
+$q3 = $conn->query("SELECT COUNT(*) AS total FROM posts WHERE status = 'draft'");
+if ($q3 && $row = $q3->fetch_assoc()) {
+    $draftPosts = (int)$row['total'];
 }
 
-$pageResult = $conn->query("SELECT COUNT(*) AS total FROM pages");
-if ($pageResult && $row = $pageResult->fetch_assoc()) {
-    $totalPages = $row['total'];
+$q4 = $conn->query("SELECT COUNT(*) AS total FROM users");
+if ($q4 && $row = $q4->fetch_assoc()) {
+    $totalUsers = (int)$row['total'];
 }
 
-$recentPosts = $conn->query("SELECT title, status, created_at FROM posts ORDER BY created_at DESC LIMIT 5");
+$recentPosts = $conn->query("SELECT title, status, created_at FROM posts ORDER BY created_at DESC LIMIT 4");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -37,89 +37,120 @@ $recentPosts = $conn->query("SELECT title, status, created_at FROM posts ORDER B
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | MiniPress CMS</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=101">
 </head>
 <body>
+<div class="admin-page">
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-brand">MiniPress</div>
 
-<div class="admin-layout">
-    <aside class="sidebar">
-        <div class="sidebar-brand">MiniPress</div>
-
-        <nav class="sidebar-menu">
+        <nav class="admin-nav">
             <a href="dashboard.php" class="active">Dashboard</a>
             <a href="posts.php">Posts</a>
-            <a href="pages.php">Pages</a>
-            <a href="categories.php">Categories</a>
-            <a href="tags.php">Tags</a>
-            <a href="../logout.php">Logout</a>
+            <a href="#">Categories</a>
+            <a href="#">Pages</a>
+            <a href="#">Media</a>
+            <a href="#">Users</a>
+            <a href="#">Settings</a>
         </nav>
     </aside>
 
-    <main class="main-content">
-        <div class="page-header">
-            <h1>Dashboard</h1>
-            <p>Welcome back, <?php echo htmlspecialchars($adminName); ?>!</p>
-        </div>
+    <main class="admin-main">
+        <header class="admin-topbar">
+            <div class="menu-icon">☰</div>
 
-        <div class="stats-grid">
-            <div class="stat-card stat-blue">
-                <h2><?php echo $totalPosts; ?></h2>
-                <p>Total Posts</p>
+            <div class="topbar-search-wrap">
+                <input type="text" placeholder="Search...">
             </div>
 
-            <div class="stat-card stat-green">
-                <h2><?php echo $publishedPosts; ?></h2>
-                <p>Published</p>
+            <div class="topbar-user">
+                <div class="topbar-user-text">
+                    <strong><?php echo htmlspecialchars($adminName); ?></strong>
+                    <span>Administrator</span>
+                </div>
+                <div class="topbar-avatar">A</div>
+            </div>
+        </header>
+
+        <section class="admin-content">
+            <div class="page-heading">
+                <h1>Dashboard</h1>
+                <p>Welcome back! Here's what's happening with your site.</p>
             </div>
 
-            <div class="stat-card stat-yellow">
-                <h2><?php echo $draftPosts; ?></h2>
-                <p>Drafts</p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title stat-blue">Total Posts</div>
+                    <div class="stat-value"><?php echo $totalPosts; ?></div>
+                    <div class="stat-sub">+2 from last week</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-title stat-green">Published</div>
+                    <div class="stat-value"><?php echo $publishedPosts; ?></div>
+                    <div class="stat-sub">+5 from last week</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-title stat-orange">Drafts</div>
+                    <div class="stat-value"><?php echo $draftPosts; ?></div>
+                    <div class="stat-sub">No changes</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-title stat-purple">Total Users</div>
+                    <div class="stat-value"><?php echo $totalUsers; ?></div>
+                    <div class="stat-sub">+1 from last week</div>
+                </div>
             </div>
 
-            <div class="stat-card stat-purple">
-                <h2><?php echo $totalPages; ?></h2>
-                <p>Pages</p>
-            </div>
-        </div>
+            <div class="dashboard-grid">
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <h3>Recent Posts</h3>
+                        <a href="posts.php">View All Posts →</a>
+                    </div>
 
-        <div class="table-card">
-            <div class="table-card-header">
-                <h3>Recent Posts</h3>
-                <a href="posts.php" class="view-btn">View All Posts</a>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if ($recentPosts && $recentPosts->num_rows > 0): ?>
-                        <?php while ($post = $recentPosts->fetch_assoc()): ?>
+                    <table class="content-table">
+                        <thead>
                             <tr>
-                                <td><?php echo htmlspecialchars($post['title']); ?></td>
-                                <td>
-                                    <span class="status-badge <?php echo $post['status'] === 'published' ? 'published' : 'draft'; ?>">
-                                        <?php echo ucfirst($post['status']); ?>
-                                    </span>
-                                </td>
-                                <td><?php echo date("M d, Y", strtotime($post['created_at'])); ?></td>
+                                <th>TITLE</th>
+                                <th>STATUS</th>
+                                <th>DATE</th>
                             </tr>
-                        <?php endwhile; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="3">No posts found yet.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
+                        </thead>
+                        <tbody>
+                            <?php if ($recentPosts && $recentPosts->num_rows > 0): ?>
+                                <?php while ($post = $recentPosts->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($post['title']); ?></td>
+                                        <td>
+                                            <span class="badge <?php echo $post['status'] === 'published' ? 'badge-green' : 'badge-orange'; ?>">
+                                                <?php echo ucfirst(htmlspecialchars($post['status'])); ?>
+                                            </span>
+                                        </td>
+                                        <td><?php echo date("M d, Y", strtotime($post['created_at'])); ?></td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="3">No posts found yet.</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card quick-actions-card">
+                    <h3>Quick Actions</h3>
+                    <a href="posts.php" class="quick-btn quick-primary">+ New Post</a>
+                    <a href="#" class="quick-btn quick-light">+ New Page</a>
+                    <a href="#" class="quick-btn quick-success">⇪ Upload Media</a>
+                    <a href="../logout.php" class="quick-btn quick-danger">Logout</a>
+                </div>
+            </div>
+        </section>
     </main>
 </div>
-
 </body>
 </html>
