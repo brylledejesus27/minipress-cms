@@ -2,7 +2,14 @@
 require_once 'includes/auth.php';
 require_once '../config/database.php';
 
-$posts = $conn->query("SELECT id, title, status, created_at FROM posts ORDER BY created_at DESC");
+$adminName = $_SESSION['admin_username'] ?? 'Admin';
+
+$posts = $conn->query("
+    SELECT posts.id, posts.title, posts.status, posts.created_at, categories.name AS category_name
+    FROM posts
+    LEFT JOIN categories ON posts.category_id = categories.id
+    ORDER BY posts.created_at DESC
+");
 
 $allCount = 0;
 $publishedCount = 0;
@@ -22,8 +29,6 @@ $c3 = $conn->query("SELECT COUNT(*) AS total FROM posts WHERE status = 'draft'")
 if ($c3 && $row = $c3->fetch_assoc()) {
     $draftCount = (int)$row['total'];
 }
-
-$adminName = $_SESSION['admin_username'] ?? 'Admin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,7 +36,7 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Posts | MiniPress CMS</title>
-    <link rel="stylesheet" href="../assets/css/admin.css?v=101">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=102">
 </head>
 <body>
 <div class="admin-page">
@@ -43,9 +48,9 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
             <a href="posts.php" class="active">Posts</a>
             <a href="categories.php">Categories</a>
             <a href="pages.php">Pages</a>
-            <a href="#">Media</a>
-            <a href="#">Users</a>
-            <a href="#">Settings</a>
+            <a href="media.php">Media</a>
+            <a href="users.php">Users</a>
+            <a href="settings.php">Settings</a>
         </nav>
     </aside>
 
@@ -72,7 +77,7 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
                     <h1>Posts</h1>
                     <p>Manage your blog posts</p>
                 </div>
-                <a href="#" class="add-post-btn">+ Add New Post</a>
+                <a href="add-post.php" class="add-post-btn">+ Add New Post</a>
             </div>
 
             <div class="content-card">
@@ -86,8 +91,8 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
                     <thead>
                         <tr>
                             <th>TITLE</th>
-                            <th>AUTHOR</th>
-                            <th>CATEGORIES</th>
+                            <th>CATEGORY</th>
+                            <th>STATUS</th>
                             <th>DATE</th>
                             <th>ACTIONS</th>
                         </tr>
@@ -97,14 +102,19 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
                             <?php while ($row = $posts->fetch_assoc()): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($row['title']); ?></td>
-                                    <td>Admin User</td>
                                     <td>
-                                        <span class="category-pill">General</span>
+                                        <span class="category-pill">
+                                            <?php echo htmlspecialchars($row['category_name'] ?? 'Uncategorized'); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge <?php echo $row['status'] === 'published' ? 'badge-green' : 'badge-orange'; ?>">
+                                            <?php echo ucfirst(htmlspecialchars($row['status'])); ?>
+                                        </span>
                                     </td>
                                     <td><?php echo date("M d, Y", strtotime($row['created_at'])); ?></td>
                                     <td class="action-cell">
-                                        <button class="icon-btn">✎</button>
-                                        <button class="icon-btn delete-btn">🗑</button>
+                                        <a href="delete-post.php?id=<?php echo $row['id']; ?>" class="icon-btn delete-btn" onclick="return confirm('Delete this post?');">🗑</a>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
