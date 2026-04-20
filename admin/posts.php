@@ -36,7 +36,7 @@ if ($c3 && $row = $c3->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Posts | MiniPress CMS</title>
-    <link rel="stylesheet" href="../assets/css/admin.css?v=102">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=103">
 </head>
 <body>
 <div class="admin-page">

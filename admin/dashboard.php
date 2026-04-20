@@ -37,7 +37,7 @@ $recentPosts = $conn->query("SELECT title, status, created_at FROM posts ORDER B
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | MiniPress CMS</title>
-    <link rel="stylesheet" href="../assets/css/admin.css?v=102">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=103">
 </head>
 <body>
 <div class="admin-page">
