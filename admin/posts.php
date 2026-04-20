@@ -41,8 +41,8 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
         <nav class="admin-nav">
             <a href="dashboard.php">Dashboard</a>
             <a href="posts.php" class="active">Posts</a>
-            <a href="#">Categories</a>
-            <a href="#">Pages</a>
+            <a href="categories.php">Categories</a>
+            <a href="pages.php">Pages</a>
             <a href="#">Media</a>
             <a href="#">Users</a>
             <a href="#">Settings</a>
