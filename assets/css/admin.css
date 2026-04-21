@@ -431,4 +431,46 @@ a {
         display: block;
         overflow-x: auto;
     }
+
+    .pages-form .form-group {
+    margin-bottom: 18px;
+}
+
+.pages-form label {
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:6px;
+    color:#374151;
+}
+
+.pages-form input,
+.pages-form textarea,
+.pages-form select {
+    width:100%;
+    padding:14px 16px;
+    border-radius:14px;
+    border:1px solid #e5e7eb;
+    background:#f9fafb;
+    font-size:14px;
+    transition:all .25s ease;
+    outline:none;
+}
+
+.pages-form textarea{
+    min-height:160px;
+    resize:vertical;
+}
+
+.pages-form input:focus,
+.pages-form textarea:focus,
+.pages-form select:focus{
+    background:#ffffff;
+    border-color:#6b5dfc;
+    box-shadow:0 0 0 3px rgba(107,93,252,0.15);
+}
+
+.pages-form .add-post-btn{
+    margin-top:8px;
+}
 }

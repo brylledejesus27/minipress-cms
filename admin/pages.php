@@ -48,6 +48,32 @@ $pages = $conn->query("SELECT * FROM pages ORDER BY id DESC");
 <meta charset="UTF-8">
 <title>Pages</title>
 <link rel="stylesheet" href="../assets/css/admin.css">
+
+<style>
+.pages-form .form-group{margin-bottom:18px;}
+.pages-form label{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:#374151;}
+.pages-form input,
+.pages-form textarea,
+.pages-form select{
+width:100%;
+padding:14px 16px;
+border-radius:14px;
+border:1px solid #e5e7eb;
+background:#f9fafb;
+font-size:14px;
+transition:.25s;
+outline:none;
+}
+.pages-form textarea{min-height:160px;resize:vertical;}
+.pages-form input:focus,
+.pages-form textarea:focus,
+.pages-form select:focus{
+background:#fff;
+border-color:#6b5dfc;
+box-shadow:0 0 0 3px rgba(107,93,252,.15);
+}
+</style>
+
 </head>
 
 <body>
@@ -66,17 +92,15 @@ $pages = $conn->query("SELECT * FROM pages ORDER BY id DESC");
 <a href="users.php">Users</a>
 <a href="settings.php">Settings</a>
 </nav>
-
 </aside>
 
 <main class="admin-main">
-
 <div class="admin-content">
 
 <h1>Pages</h1>
 <p>Manage your pages</p>
 
-<div class="content-card">
+<div class="content-card pages-form">
 
 <form method="POST">
 
@@ -131,7 +155,6 @@ $pages = $conn->query("SELECT * FROM pages ORDER BY id DESC");
 </td>
 </tr>
 <?php endwhile; ?>
-
 </table>
 
 </div>
@@ -143,7 +166,7 @@ $edit = $conn->query("SELECT * FROM pages WHERE id=$id")->fetch_assoc();
 
 <br>
 
-<div class="content-card">
+<div class="content-card pages-form">
 
 <form method="POST">
 
@@ -176,9 +199,7 @@ $edit = $conn->query("SELECT * FROM pages WHERE id=$id")->fetch_assoc();
 <?php endif; ?>
 
 </div>
-
 </main>
-
 </div>
 
 </body>
