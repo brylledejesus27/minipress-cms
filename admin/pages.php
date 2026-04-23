@@ -101,7 +101,6 @@ box-shadow:0 0 0 3px rgba(107,93,252,.15);
 <p>Manage your pages</p>
 
 <div class="content-card pages-form">
-
 <form method="POST">
 
 <div class="form-group">
@@ -125,13 +124,11 @@ box-shadow:0 0 0 3px rgba(107,93,252,.15);
 <button class="add-post-btn" name="add">+ Add Page</button>
 
 </form>
-
 </div>
 
 <br>
 
 <div class="content-card">
-
 <table class="content-table">
 <tr>
 <th>Title</th>
@@ -156,30 +153,33 @@ box-shadow:0 0 0 3px rgba(107,93,252,.15);
 </tr>
 <?php endwhile; ?>
 </table>
-
 </div>
 
-<?php if(isset($_GET['edit'])):
+<?php if (isset($_GET['edit']) && is_numeric($_GET['edit'])): ?>
+
+<?php
 $id = (int)$_GET['edit'];
-$edit = $conn->query("SELECT * FROM pages WHERE id=$id")->fetch_assoc();
+$result = $conn->query("SELECT * FROM pages WHERE id = $id");
+
+if ($result && $result->num_rows > 0):
+$edit = $result->fetch_assoc();
 ?>
 
 <br>
 
 <div class="content-card pages-form">
-
 <form method="POST">
 
 <input type="hidden" name="id" value="<?php echo $edit['id']; ?>">
 
 <div class="form-group">
 <label>Title</label>
-<input type="text" name="title" value="<?php echo $edit['title']; ?>">
+<input type="text" name="title" value="<?php echo htmlspecialchars($edit['title']); ?>" required>
 </div>
 
 <div class="form-group">
 <label>Content</label>
-<textarea name="content"><?php echo $edit['content']; ?></textarea>
+<textarea name="content"><?php echo htmlspecialchars($edit['content']); ?></textarea>
 </div>
 
 <div class="form-group">
@@ -193,8 +193,11 @@ $edit = $conn->query("SELECT * FROM pages WHERE id=$id")->fetch_assoc();
 <button class="add-post-btn" name="update">Update</button>
 
 </form>
-
 </div>
+
+<?php else: ?>
+<p style="color:red;">Page not found.</p>
+<?php endif; ?>
 
 <?php endif; ?>
 

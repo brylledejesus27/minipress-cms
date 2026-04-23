@@ -53,6 +53,25 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Categories | MiniPress CMS</title>
 <link rel="stylesheet" href="../assets/css/admin.css?v=101">
+
+<style>
+.category-form input{
+width:100%;
+padding:14px 16px;
+border-radius:14px;
+border:1px solid #e5e7eb;
+background:#f9fafb;
+font-size:14px;
+transition:.25s;
+outline:none;
+}
+.category-form input:focus{
+background:#fff;
+border-color:#6b5dfc;
+box-shadow:0 0 0 3px rgba(107,93,252,.15);
+}
+</style>
+
 </head>
 
 <body>
@@ -99,7 +118,7 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
 </div>
 </div>
 
-<div class="content-card" style="margin-bottom:20px;">
+<div class="content-card category-form" style="margin-bottom:20px;">
 <form method="POST">
 <input type="text" name="name" placeholder="Category name" required>
 <button class="add-post-btn" name="add">+ Add New Category</button>
@@ -139,20 +158,31 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
 </table>
 </div>
 
-<?php if (isset($_GET['edit'])):
+<?php if (isset($_GET['edit']) && is_numeric($_GET['edit'])): ?>
+
+<?php
 $id = (int)$_GET['edit'];
-$edit = $conn->query("SELECT * FROM categories WHERE id=$id")->fetch_assoc();
+$result = $conn->query("SELECT * FROM categories WHERE id = $id");
+
+if ($result && $result->num_rows > 0):
+$edit = $result->fetch_assoc();
 ?>
 
-<div class="content-card" style="margin-top:20px;">
+<div class="content-card category-form" style="margin-top:20px;">
 <h3>Edit Category</h3>
 
 <form method="POST">
 <input type="hidden" name="id" value="<?php echo $edit['id']; ?>">
+
 <input type="text" name="name" value="<?php echo htmlspecialchars($edit['name']); ?>" required>
+
 <button class="add-post-btn" name="update">Update</button>
 </form>
 </div>
+
+<?php else: ?>
+<p style="color:red;">Category not found.</p>
+<?php endif; ?>
 
 <?php endif; ?>
 
