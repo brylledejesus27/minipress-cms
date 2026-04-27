@@ -2,6 +2,8 @@
 require_once 'includes/auth.php';
 require_once '../config/database.php';
 
+$adminName = $_SESSION['admin_username'] ?? 'Admin';
+
 if (isset($_POST['add'])) {
     $title = trim($_POST['title']);
     $slug = strtolower(str_replace(' ', '-', $title));
@@ -95,6 +97,24 @@ box-shadow:0 0 0 3px rgba(107,93,252,.15);
 </aside>
 
 <main class="admin-main">
+
+<!-- 🔥 TOPBAR ADDED -->
+<header class="admin-topbar">
+<div class="menu-icon">☰</div>
+
+<div class="topbar-search-wrap">
+<input type="text" placeholder="Search...">
+</div>
+
+<div class="topbar-user">
+<div class="topbar-user-text">
+<strong><?php echo htmlspecialchars($adminName); ?></strong>
+<span>Administrator</span>
+</div>
+<div class="topbar-avatar">A</div>
+</div>
+</header>
+
 <div class="admin-content">
 
 <h1>Pages</h1>
@@ -121,7 +141,10 @@ box-shadow:0 0 0 3px rgba(107,93,252,.15);
 </select>
 </div>
 
+<div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
 <button class="add-post-btn" name="add">+ Add Page</button>
+<a href="media.php" class="add-post-btn">Open Media</a>
+</div>
 
 </form>
 </div>
@@ -155,9 +178,7 @@ box-shadow:0 0 0 3px rgba(107,93,252,.15);
 </table>
 </div>
 
-<?php if (isset($_GET['edit']) && is_numeric($_GET['edit'])): ?>
-
-<?php
+<?php if (isset($_GET['edit']) && is_numeric($_GET['edit'])):
 $id = (int)$_GET['edit'];
 $result = $conn->query("SELECT * FROM pages WHERE id = $id");
 
@@ -195,11 +216,7 @@ $edit = $result->fetch_assoc();
 </form>
 </div>
 
-<?php else: ?>
-<p style="color:red;">Page not found.</p>
-<?php endif; ?>
-
-<?php endif; ?>
+<?php endif; endif; ?>
 
 </div>
 </main>
