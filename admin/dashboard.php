@@ -40,8 +40,8 @@ $recentPosts = $conn->query("SELECT title, status, created_at FROM posts ORDER B
     <link rel="stylesheet" href="../assets/css/admin.css?v=103">
 </head>
 <body>
-<div class="admin-page">
-    <aside class="admin-sidebar">
+<div class="admin-page" id="adminPage">
+    <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-brand">MiniPress</div>
 
         <nav class="admin-nav">
@@ -57,7 +57,7 @@ $recentPosts = $conn->query("SELECT title, status, created_at FROM posts ORDER B
 
     <main class="admin-main">
         <header class="admin-topbar">
-            <div class="menu-icon">☰</div>
+            <div class="menu-icon" id="sidebarToggle" style="cursor:pointer;">☰</div>
 
             <div class="topbar-search-wrap">
                 <input type="text" placeholder="Search...">
@@ -152,5 +152,13 @@ $recentPosts = $conn->query("SELECT title, status, created_at FROM posts ORDER B
         </section>
     </main>
 </div>
+<script>
+const toggle = document.getElementById('sidebarToggle');
+const sidebar = document.getElementById('adminSidebar');
+toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('sidebar-collapsed');
+});
+</script>
+
 </body>
 </html>

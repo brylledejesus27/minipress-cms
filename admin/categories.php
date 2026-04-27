@@ -2,6 +2,21 @@
 require_once 'includes/auth.php';
 require_once '../config/database.php';
 
+$adminName = $_SESSION['admin_username'] ?? 'Admin';
+
+$editMode = false;
+$editData = null;
+
+if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
+    $id = (int)$_GET['edit'];
+    $result = $conn->query("SELECT * FROM categories WHERE id = $id");
+
+    if ($result && $result->num_rows > 0) {
+        $editMode = true;
+        $editData = $result->fetch_assoc();
+    }
+}
+
 if (isset($_POST['add'])) {
     $name = trim($_POST['name']);
     $slug = strtolower(str_replace(' ', '-', $name));
@@ -9,14 +24,6 @@ if (isset($_POST['add'])) {
     $stmt = $conn->prepare("INSERT INTO categories (name, slug) VALUES (?, ?)");
     $stmt->bind_param("ss", $name, $slug);
     $stmt->execute();
-
-    header("Location: categories.php");
-    exit();
-}
-
-if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
-    $conn->query("DELETE FROM categories WHERE id=$id");
 
     header("Location: categories.php");
     exit();
@@ -35,6 +42,14 @@ if (isset($_POST['update'])) {
     exit();
 }
 
+if (isset($_GET['delete'])) {
+    $id = (int)$_GET['delete'];
+    $conn->query("DELETE FROM categories WHERE id=$id");
+
+    header("Location: categories.php");
+    exit();
+}
+
 $categories = $conn->query("
     SELECT c.*, COUNT(p.id) AS post_count
     FROM categories c
@@ -42,20 +57,19 @@ $categories = $conn->query("
     GROUP BY c.id
     ORDER BY c.id DESC
 ");
-
-$adminName = $_SESSION['admin_username'] ?? 'Admin';
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Categories | MiniPress CMS</title>
+<title>Categories</title>
 <link rel="stylesheet" href="../assets/css/admin.css?v=101">
 
 <style>
-.category-form input{
+.pages-form .form-group{margin-bottom:18px;}
+.pages-form label{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:#374151;}
+.pages-form input{
 width:100%;
 padding:14px 16px;
 border-radius:14px;
@@ -65,7 +79,7 @@ font-size:14px;
 transition:.25s;
 outline:none;
 }
-.category-form input:focus{
+.pages-form input:focus{
 background:#fff;
 border-color:#6b5dfc;
 box-shadow:0 0 0 3px rgba(107,93,252,.15);
@@ -75,9 +89,9 @@ box-shadow:0 0 0 3px rgba(107,93,252,.15);
 </head>
 
 <body>
-<div class="admin-page">
 
-<aside class="admin-sidebar">
+   <div class="admin-page" id="adminPage">
+<aside class="admin-sidebar" id="adminSidebar">
 <div class="admin-sidebar-brand">MiniPress</div>
 
 <nav class="admin-nav">
@@ -94,7 +108,7 @@ box-shadow:0 0 0 3px rgba(107,93,252,.15);
 <main class="admin-main">
 
 <header class="admin-topbar">
-<div class="menu-icon">☰</div>
+<div class="menu-icon" id="sidebarToggle" style="cursor:pointer;">☰</div>
 
 <div class="topbar-search-wrap">
 <input type="text" placeholder="Search...">
@@ -118,14 +132,29 @@ box-shadow:0 0 0 3px rgba(107,93,252,.15);
 </div>
 </div>
 
-<div class="content-card category-form" style="margin-bottom:20px;">
+<div class="content-card pages-form" style="margin-bottom:20px;">
 <form method="POST">
-<input type="text" name="name" placeholder="Category name" required>
-<button class="add-post-btn" name="add">+ Add New Category</button>
+
+<?php if($editMode): ?>
+<input type="hidden" name="id" value="<?php echo $editData['id']; ?>">
+<?php endif; ?>
+
+<div class="form-group">
+<label>Category Name</label>
+<input type="text" name="name"
+value="<?php echo $editMode ? htmlspecialchars($editData['name']) : ''; ?>"
+required>
+</div>
+
+<button class="add-post-btn" name="<?php echo $editMode ? 'update' : 'add'; ?>">
+<?php echo $editMode ? 'Update Category' : '+ Add New Category'; ?>
+</button>
+
 </form>
 </div>
 
 <div class="content-card">
+
 <table class="content-table">
 <thead>
 <tr>
@@ -150,44 +179,26 @@ box-shadow:0 0 0 3px rgba(107,93,252,.15);
 </tr>
 <?php endwhile; ?>
 <?php else: ?>
-<tr>
-<td colspan="4">No categories found.</td>
-</tr>
+<tr><td colspan="4">No categories found.</td></tr>
 <?php endif; ?>
 </tbody>
+
 </table>
+
 </div>
-
-<?php if (isset($_GET['edit']) && is_numeric($_GET['edit'])): ?>
-
-<?php
-$id = (int)$_GET['edit'];
-$result = $conn->query("SELECT * FROM categories WHERE id = $id");
-
-if ($result && $result->num_rows > 0):
-$edit = $result->fetch_assoc();
-?>
-
-<div class="content-card category-form" style="margin-top:20px;">
-<h3>Edit Category</h3>
-
-<form method="POST">
-<input type="hidden" name="id" value="<?php echo $edit['id']; ?>">
-
-<input type="text" name="name" value="<?php echo htmlspecialchars($edit['name']); ?>" required>
-
-<button class="add-post-btn" name="update">Update</button>
-</form>
-</div>
-
-<?php else: ?>
-<p style="color:red;">Category not found.</p>
-<?php endif; ?>
-
-<?php endif; ?>
 
 </section>
 </main>
+
 </div>
+
+<script>
+const toggle = document.getElementById('sidebarToggle');
+const sidebar = document.getElementById('adminSidebar');
+toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('sidebar-collapsed');
+});
+</script>
+
 </body>
 </html>
