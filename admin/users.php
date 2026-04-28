@@ -293,7 +293,7 @@ if ($countQuery && $row = $countQuery->fetch_assoc()) {
 <body>
 <div class="admin-page">
 
-    <aside class="admin-sidebar">
+    <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-brand">MiniPress</div>
 
         <nav class="admin-nav">
@@ -309,7 +309,7 @@ if ($countQuery && $row = $countQuery->fetch_assoc()) {
 
     <main class="admin-main">
         <header class="admin-topbar">
-            <div class="menu-icon">☰</div>
+            <div class="menu-icon" id="sidebarToggle" style="cursor:pointer;">☰</div>
 
             <div class="topbar-search-wrap">
                 <input type="text" placeholder="Search...">
@@ -458,5 +458,14 @@ if ($countQuery && $row = $countQuery->fetch_assoc()) {
         </section>
     </main>
 </div>
+
+<script>
+const toggle = document.getElementById('sidebarToggle');
+const sidebar = document.getElementById('adminSidebar');
+
+toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('sidebar-collapsed');
+});
+</script>
 </body>
 </html>
