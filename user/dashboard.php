@@ -33,6 +33,8 @@ $categories = $conn->query("
         <div class="admin-sidebar-brand">MiniPress</div>
         <nav class="admin-nav">
             <a href="dashboard.php" class="active">📰 Posts</a>
+            <a href="create-post.php">✏️ Write Post</a>
+            <a href="my-posts.php">📋 My Posts</a>
             <a href="profile.php">👤 My Profile</a>
             <a href="../logout.php">🚪 Logout</a>
         </nav>
