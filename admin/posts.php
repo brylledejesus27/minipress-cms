@@ -6,9 +6,10 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
 
 $filter = $_GET['filter'] ?? 'all';
 
-$allCount = 0;
+$allCount     = 0;
 $publishedCount = 0;
-$draftCount = 0;
+$draftCount   = 0;
+$pendingCount = 0;
 
 $c1 = $conn->query("SELECT COUNT(*) AS total FROM posts");
 if ($c1 && $row = $c1->fetch_assoc()) $allCount = (int)$row['total'];
@@ -19,9 +20,13 @@ if ($c2 && $row = $c2->fetch_assoc()) $publishedCount = (int)$row['total'];
 $c3 = $conn->query("SELECT COUNT(*) AS total FROM posts WHERE status = 'draft'");
 if ($c3 && $row = $c3->fetch_assoc()) $draftCount = (int)$row['total'];
 
+$c4 = $conn->query("SELECT COUNT(*) AS total FROM posts WHERE status = 'pending'");
+if ($c4 && $row = $c4->fetch_assoc()) $pendingCount = (int)$row['total'];
+
 $whereClause = '';
 if ($filter === 'published') $whereClause = "WHERE posts.status = 'published'";
 elseif ($filter === 'drafts') $whereClause = "WHERE posts.status = 'draft'";
+elseif ($filter === 'pending') $whereClause = "WHERE posts.status = 'pending'";
 
 $posts = $conn->query("
     SELECT posts.id, posts.title, posts.status, posts.created_at, categories.name AS category_name
@@ -37,7 +42,13 @@ $posts = $conn->query("
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Posts | MiniPress CMS</title>
-    <link rel="stylesheet" href="../assets/css/admin.css?v=104">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=105">
+    <style>
+        .badge-pending {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+    </style>
 </head>
 <body>
 <div class="admin-page" id="adminPage">
@@ -46,6 +57,7 @@ $posts = $conn->query("
         <nav class="admin-nav">
             <a href="dashboard.php">Dashboard</a>
             <a href="posts.php" class="active">Posts</a>
+            <a href="pending-posts.php">⏳ Pending Posts</a>
             <a href="categories.php">Categories</a>
             <a href="pages.php">Pages</a>
             <a href="media.php">Media</a>
@@ -83,6 +95,7 @@ $posts = $conn->query("
                     <a href="posts.php?filter=all" class="tab <?php echo $filter === 'all' ? 'active' : ''; ?>">All (<?php echo $allCount; ?>)</a>
                     <a href="posts.php?filter=published" class="tab <?php echo $filter === 'published' ? 'active' : ''; ?>">Published (<?php echo $publishedCount; ?>)</a>
                     <a href="posts.php?filter=drafts" class="tab <?php echo $filter === 'drafts' ? 'active' : ''; ?>">Drafts (<?php echo $draftCount; ?>)</a>
+                    <a href="posts.php?filter=pending" class="tab <?php echo $filter === 'pending' ? 'active' : ''; ?>">Pending (<?php echo $pendingCount; ?>)</a>
                 </div>
 
                 <table class="content-table posts-table">
@@ -110,7 +123,11 @@ $posts = $conn->query("
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge <?php echo $row['status'] === 'published' ? 'badge-green' : 'badge-orange'; ?>">
+                                        <span class="badge <?php
+                                            if ($row['status'] === 'published') echo 'badge-green';
+                                            elseif ($row['status'] === 'pending') echo 'badge-pending';
+                                            else echo 'badge-orange';
+                                        ?>">
                                             <?php echo ucfirst(htmlspecialchars($row['status'])); ?>
                                         </span>
                                     </td>
@@ -122,7 +139,7 @@ $posts = $conn->query("
                                 </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <tr><td colspan="5">No posts found.</td></tr>
+                            <tr><td colspan="5" style="text-align:center; color:#667085;">No posts found.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
