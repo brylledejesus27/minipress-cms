@@ -59,8 +59,11 @@ CREATE TABLE IF NOT EXISTS pages (
 
 CREATE TABLE IF NOT EXISTS media (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    file_name VARCHAR(255) NOT NULL,
-    file_path VARCHAR(255) NOT NULL,
+    filename VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
     file_type VARCHAR(100) NOT NULL,
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    file_size INT NOT NULL,
+    uploaded_by INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
 );
