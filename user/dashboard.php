@@ -4,20 +4,24 @@ require_once '../config/database.php';
 
 $username = $_SESSION['user_username'] ?? 'User';
 
-$posts = $conn->query("
-    SELECT posts.*, categories.name AS category_name
-    FROM posts
-    LEFT JOIN categories ON posts.category_id = categories.id
-    WHERE posts.status = 'published'
-    ORDER BY posts.is_pinned DESC, posts.published_at DESC
-");
-
-$categories = $conn->query("
-    SELECT categories.*, COUNT(posts.id) AS post_count
-    FROM categories
-    LEFT JOIN posts ON posts.category_id = categories.id AND posts.status = 'published'
-    GROUP BY categories.id ORDER BY post_count DESC
-");
+// Use SearchPosts stored procedure if search query exists
+$searchKeyword = trim($_GET['search'] ?? '');
+if ($searchKeyword !== '') {
+    $stmt = $conn->prepare("CALL SearchPosts(?)");
+    $stmt->bind_param("s", $searchKeyword);
+    $stmt->execute();
+    $posts = $stmt->get_result();
+    $stmt->close();
+    $conn->next_result();
+} else {
+    $posts = $conn->query("
+        SELECT posts.*, categories.name AS category_name
+        FROM posts
+        LEFT JOIN categories ON posts.category_id = categories.id
+        WHERE posts.status = 'published'
+        ORDER BY posts.is_pinned DESC, posts.published_at DESC
+    ");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -44,7 +48,12 @@ $categories = $conn->query("
         <header class="admin-topbar">
             <div class="menu-icon" id="sidebarToggle" style="cursor:pointer;">☰</div>
             <div class="topbar-search-wrap">
-                <input type="text" id="searchInput" placeholder="Search posts...">
+                <form method="GET" action="dashboard.php" style="display:flex;gap:8px;width:100%;max-width:360px;">
+                    <input type="text" name="search" placeholder="Search posts..."
+                           value="<?php echo htmlspecialchars($searchKeyword); ?>"
+                           style="flex:1;">
+                    <button type="submit" style="background:linear-gradient(135deg,#5a4efc,#6b5dfc);color:#fff;border:none;border-radius:10px;padding:0 16px;cursor:pointer;font-weight:700;">🔍</button>
+                </form>
             </div>
             <div class="topbar-user">
                 <div class="topbar-user-text">
@@ -58,10 +67,17 @@ $categories = $conn->query("
         <section class="admin-content">
             <div class="page-heading">
                 <h1>Latest Posts</h1>
-                <p>Browse and read published articles</p>
+                <p>
+                    <?php if ($searchKeyword): ?>
+                        Search results for: <strong>"<?php echo htmlspecialchars($searchKeyword); ?>"</strong>
+                        — <a href="dashboard.php" style="color:#5a4efc;font-weight:700;">Clear search</a>
+                    <?php else: ?>
+                        Browse and read published articles
+                    <?php endif; ?>
+                </p>
             </div>
 
-            <div class="content-card" style="margin-top: 22px;">
+            <div class="content-card" style="margin-top:22px;">
                 <table class="content-table" id="postsTable">
                     <thead>
                         <tr>
@@ -77,7 +93,7 @@ $categories = $conn->query("
                             <tr>
                                 <td>
                                     <?php if ($post['is_pinned']): ?>
-                                        <span style="color:#d97706; font-size:12px;">📌 </span>
+                                        <span style="color:#d97706;font-size:12px;">📌 </span>
                                     <?php endif; ?>
                                     <strong><?php echo htmlspecialchars($post['title']); ?></strong>
                                 </td>
@@ -88,12 +104,16 @@ $categories = $conn->query("
                                 </td>
                                 <td><?php echo date("M d, Y", strtotime($post['published_at'] ?? $post['created_at'])); ?></td>
                                 <td>
-                                    <a href="post.php?id=<?php echo $post['id']; ?>" class="add-post-btn" style="font-size:13px; padding: 8px 16px;">Read →</a>
+                                    <a href="post.php?id=<?php echo $post['id']; ?>" class="add-post-btn" style="font-size:13px;padding:8px 16px;">Read →</a>
                                 </td>
                             </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <tr><td colspan="4">No posts available yet.</td></tr>
+                            <tr>
+                                <td colspan="4" style="text-align:center;color:#667085;padding:30px;">
+                                    <?php echo $searchKeyword ? 'No posts found for "' . htmlspecialchars($searchKeyword) . '"' : 'No posts available yet.'; ?>
+                                </td>
+                            </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -106,13 +126,6 @@ $categories = $conn->query("
 const toggle = document.getElementById('sidebarToggle');
 const sidebar = document.getElementById('adminSidebar');
 toggle.addEventListener('click', () => sidebar.classList.toggle('sidebar-collapsed'));
-
-document.getElementById('searchInput').addEventListener('input', function () {
-    const q = this.value.toLowerCase();
-    document.querySelectorAll('#postsTable tbody tr').forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-    });
-});
 </script>
 </body>
 </html>

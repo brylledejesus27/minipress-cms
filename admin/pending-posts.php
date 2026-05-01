@@ -6,13 +6,14 @@ $adminName = $_SESSION['admin_username'] ?? 'Admin';
 $error   = "";
 $success = "";
 
-// Approve
+// Approve using stored procedure
 if (isset($_GET['approve']) && is_numeric($_GET['approve'])) {
     $id   = (int)$_GET['approve'];
-    $stmt = $conn->prepare("UPDATE posts SET status = 'published', published_at = NOW() WHERE id = ?");
+    $stmt = $conn->prepare("CALL ApprovePendingPost(?)");
     $stmt->bind_param("i", $id);
     $stmt->execute() ? $success = "Post approved and published!" : $error = "Failed to approve post.";
     $stmt->close();
+    $conn->next_result();
 }
 
 // Reject
@@ -43,28 +44,13 @@ $pendingCount = $posts ? $posts->num_rows : 0;
     <title>Pending Posts | MiniPress CMS</title>
     <link rel="stylesheet" href="../assets/css/admin.css">
     <style>
-        .alert-error { background: #fee2e2; color: #b91c1c; padding: 12px 14px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; }
-        .alert-success { background: #dcfce7; color: #15803d; padding: 12px 14px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; }
-        .approve-btn {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: #dcfce7; color: #15803d;
-            padding: 8px 14px; border-radius: 8px;
-            font-size: 13px; font-weight: 700;
-        }
-        .reject-btn {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: #fee2e2; color: #b91c1c;
-            padding: 8px 14px; border-radius: 8px;
-            font-size: 13px; font-weight: 700;
-        }
-        .preview-btn {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: #eef2ff; color: #4f46e5;
-            padding: 8px 14px; border-radius: 8px;
-            font-size: 13px; font-weight: 700;
-        }
-        .author-tag { font-size: 13px; color: #667085; }
-        .empty-pending { text-align: center; padding: 40px; color: #667085; font-size: 15px; }
+        .alert-error { background:#fee2e2;color:#b91c1c;padding:12px 14px;border-radius:10px;margin-bottom:16px;font-weight:600; }
+        .alert-success { background:#dcfce7;color:#15803d;padding:12px 14px;border-radius:10px;margin-bottom:16px;font-weight:600; }
+        .approve-btn { display:inline-flex;align-items:center;justify-content:center;background:#dcfce7;color:#15803d;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700; }
+        .reject-btn  { display:inline-flex;align-items:center;justify-content:center;background:#fee2e2;color:#b91c1c;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700; }
+        .preview-btn { display:inline-flex;align-items:center;justify-content:center;background:#eef2ff;color:#4f46e5;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700; }
+        .author-tag  { font-size:13px;color:#667085; }
+        .empty-pending { text-align:center;padding:40px;color:#667085;font-size:15px; }
     </style>
 </head>
 <body>
@@ -108,7 +94,7 @@ $pendingCount = $posts ? $posts->num_rows : 0;
             <?php if ($error): ?><div class="alert-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
             <?php if ($success): ?><div class="alert-success"><?php echo htmlspecialchars($success); ?></div><?php endif; ?>
 
-            <div class="content-card" style="margin-top: 22px;">
+            <div class="content-card" style="margin-top:22px;">
                 <?php if ($posts && $posts->num_rows > 0): ?>
                 <table class="content-table">
                     <thead>
@@ -125,18 +111,12 @@ $pendingCount = $posts ? $posts->num_rows : 0;
                         <tr>
                             <td><strong><?php echo htmlspecialchars($row['title']); ?></strong></td>
                             <td><span class="author-tag">👤 <?php echo htmlspecialchars($row['author_name'] ?? 'Unknown'); ?></span></td>
-                            <td>
-                                <span class="category-pill">
-                                    <?php echo htmlspecialchars($row['category_name'] ?? 'Uncategorized'); ?>
-                                </span>
-                            </td>
+                            <td><span class="category-pill"><?php echo htmlspecialchars($row['category_name'] ?? 'Uncategorized'); ?></span></td>
                             <td><?php echo date("M d, Y", strtotime($row['created_at'])); ?></td>
                             <td class="action-cell">
                                 <a href="preview-post.php?id=<?php echo $row['id']; ?>" class="preview-btn">👁 Preview</a>
-                                <a href="pending-posts.php?approve=<?php echo $row['id']; ?>" class="approve-btn"
-                                   onclick="return confirm('Approve and publish this post?');">✅ Approve</a>
-                                <a href="pending-posts.php?reject=<?php echo $row['id']; ?>" class="reject-btn"
-                                   onclick="return confirm('Reject and delete this post?');">❌ Reject</a>
+                                <a href="pending-posts.php?approve=<?php echo $row['id']; ?>" class="approve-btn" onclick="return confirm('Approve and publish this post?');">✅ Approve</a>
+                                <a href="pending-posts.php?reject=<?php echo $row['id']; ?>" class="reject-btn" onclick="return confirm('Reject and delete this post?');">❌ Reject</a>
                             </td>
                         </tr>
                         <?php endwhile; ?>
