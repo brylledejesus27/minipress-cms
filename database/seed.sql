@@ -1,3 +1,6 @@
+-- Default admin account (password: admin123)
+INSERT INTO users (username, password, role) VALUES
+('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
 
 INSERT INTO categories (name, slug) VALUES
 ('Tutorial', 'tutorial'),
@@ -13,24 +16,24 @@ INSERT INTO tags (name, slug) VALUES
 ('CMS', 'cms'),
 ('Web Design', 'web-design');
 
-INSERT INTO posts (title, slug, content, category_id, featured_image, status, is_pinned, published_at) VALUES
-('Getting Started with MiniPress', 'getting-started-with-minipress',
+INSERT INTO posts (author_id, title, slug, content, category_id, featured_image, status, is_pinned, published_at) VALUES
+(1, 'Getting Started with MiniPress', 'getting-started-with-minipress',
 'This is the first sample post for MiniPress CMS. It introduces the basic setup and purpose of the system.',
 1, NULL, 'published', 1, NOW()),
 
-('Web Development Best Practices', 'web-development-best-practices',
+(1, 'Web Development Best Practices', 'web-development-best-practices',
 'This sample article talks about clean structure, readable code, and proper project organization for web applications.',
 2, NULL, 'published', 0, NOW()),
 
-('How to Secure Your Website', 'how-to-secure-your-website',
+(1, 'How to Secure Your Website', 'how-to-secure-your-website',
 'This post discusses authentication, password hashing, input validation, and session protection.',
 3, NULL, 'draft', 0, NULL),
 
-('Understanding UI Layout Design', 'understanding-ui-layout-design',
+(1, 'Understanding UI Layout Design', 'understanding-ui-layout-design',
 'This post explains spacing, alignment, cards, sidebars, typography, and modern CMS dashboard layout patterns.',
 4, NULL, 'published', 0, NOW()),
 
-('The Future of CMS Platforms', 'the-future-of-cms-platforms',
+(1, 'The Future of CMS Platforms', 'the-future-of-cms-platforms',
 'This sample article explores how content management systems continue to evolve for blogs, business websites, and custom platforms.',
 5, NULL, 'draft', 0, NULL);
 
