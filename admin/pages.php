@@ -136,19 +136,19 @@ margin-top:8px;
 
 <div class="admin-page" id="adminPage">
 
-<aside class="admin-sidebar" id="adminSidebar">
-<div class="admin-sidebar-brand">MiniPress</div>
+     <aside class="admin-sidebar" id="adminSidebar">
+     <div class="admin-sidebar-brand">MiniPress</div>
 
-<nav class="admin-nav">
-<a href="dashboard.php">Dashboard</a>
-<a href="posts.php">Posts</a>
-<a href="categories.php">Categories</a>
-<a href="pages.php" class="active">Pages</a>
-<a href="media.php">Media</a>
-<a href="users.php">Users</a>
-<a href="settings.php">Settings</a>
-</nav>
-</aside>
+      <nav class="admin-nav">
+      <a href="dashboard.php">Dashboard</a>
+      <a href="posts.php">Posts</a>
+      <a href="categories.php">Categories</a>
+      <a href="pages.php" class="active">Pages</a>
+      <a href="media.php">Media</a>
+     <a href="users.php">Users</a>
+     <a href="settings.php">Settings</a>
+     </nav>
+     </aside>
 
 <main class="admin-main">
 
@@ -232,7 +232,11 @@ margin-top:8px;
 <?php if ($pages && $pages->num_rows > 0): ?>
 <?php while ($row = $pages->fetch_assoc()): ?>
 <tr>
-<td><?php echo htmlspecialchars($row['title']); ?></td>
+<td>
+<a href="view-page.php?id=<?php echo $row['id']; ?>" class="post-title-link">
+<?php echo htmlspecialchars($row['title']); ?>
+</a>
+</td>
 <td><?php echo $row['slug']; ?></td>
 <td>
 <span class="badge <?php echo $row['status']=='published' ? 'badge-green':'badge-orange'; ?>">
